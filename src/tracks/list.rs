@@ -53,7 +53,7 @@ pub struct PresavedBandcampList {
 fn read_embedded() -> Option<PresavedBandcampList> {
     #[cfg(has_embedded_data)]
     {
-        let bytes = include_bytes!("../../data/bandcamp_lofigirl.json.gz");
+        let bytes = include_bytes!(env!("BANDCAMP_EMBEDDED_PATH"));
         let mut decoder = GzDecoder::new(std::io::Cursor::new(bytes));
         let mut out = String::new();
         if std::io::Read::read_to_string(&mut decoder, &mut out).is_ok() {
