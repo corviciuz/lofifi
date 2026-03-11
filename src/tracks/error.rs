@@ -17,6 +17,9 @@ pub enum Kind {
 
     #[error("unable to fetch data: {0}")]
     Request(#[from] reqwest::Error),
+
+    #[error("track list is empty")]
+    EmptyList,
 }
 
 #[derive(Debug, thiserror::Error)]

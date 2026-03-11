@@ -124,7 +124,13 @@ impl DiscographyParser {
         let document = Html::parse_document(html);
         let mut items = HashMap::new();
 
-        if let Some(single) = Self::check_single_item(&document, artist_url)? {
+        if artist_url.contains("/album/") || artist_url.contains("/track/") {
+             if let Some(single) = Self::check_single_item(&document, artist_url, true)? {
+                return Ok(vec![single]);
+            }
+        }
+
+        if let Some(single) = Self::check_single_item(&document, artist_url, false)? {
             return Ok(vec![single]);
         }
 
@@ -139,8 +145,8 @@ impl DiscographyParser {
         Ok(filtered_items)
     }
 
-    fn check_single_item(document: &Html, artist_url: &str) -> Result<Option<DiscographyItem>> {
-        if !Self::is_single_page(document) {
+    fn check_single_item(document: &Html, artist_url: &str, force: bool) -> Result<Option<DiscographyItem>> {
+        if !force && !Self::is_single_page(document) {
             return Ok(None);
         }
 
@@ -405,7 +411,12 @@ impl DiscographyParser {
         } else if url.starts_with("//") {
             format!("https:{}", url)
         } else if url.starts_with("/") {
-            let base = base_url.trim_end_matches("/music");
+
+            let base = if let Ok(u) = url::Url::parse(base_url) {
+                format!("{}://{}", u.scheme(), u.host_str().unwrap_or(""))
+            } else {
+                base_url.trim_end_matches("/music").to_string()
+            };
             format!("{}{}", base, url)
         } else {
             format!("{}/{}", base_url.trim_end_matches("/"), url)

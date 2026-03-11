@@ -1,7 +1,4 @@
-use std::{
-    error::Error,
-    sync::{atomic::Ordering, Arc},
-};
+use std::sync::{atomic::Ordering, Arc};
 use tokio::{sync::mpsc::Sender, time::sleep};
 
 use crate::{
@@ -26,7 +23,11 @@ impl Player {
             self.progress.store(0.0, Ordering::Relaxed);
             debug_log!("queue.rs - fetch: buffer empty; fetching random");
 
-            let (path, custom_name, art_url) = self.list.random_path();
+            let (path, custom_name, art_url) = self.list.random_path()
+                .ok_or_else(|| tracks::Error {
+                    track: "list".to_string(),
+                    kind: tracks::error::Kind::EmptyList,
+                })?;
 
             #[cfg(feature = "color")]
             let cover_future = {
@@ -114,7 +115,7 @@ impl Player {
         player: Arc<Self>,
         itx: Sender<()>,
         tx: Sender<Message>,
-        debug: bool,
+        _debug: bool,
     ) -> eyre::Result<()> {
 
         player.sink.stop();
@@ -137,9 +138,6 @@ impl Player {
             }
             Err(error) => {
                 debug_log!("queue.rs - next: error occurred err={}", error);
-                if debug {
-                    panic!("{error} - {:?}", error.source())
-                }
 
                 if !error.is_timeout() {
                     sleep(player.timeout).await;

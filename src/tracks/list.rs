@@ -107,7 +107,10 @@ impl List {
         self.lines[0].trim()
     }
 
-    pub(crate) fn random_path(&self) -> (String, Option<String>, Option<String>) {
+    pub(crate) fn random_path(&self) -> Option<(String, Option<String>, Option<String>)> {
+        if self.lines.len() <= 1 {
+            return None;
+        }
 
         let random = fastrand::usize(1..self.lines.len());
         let line = self.lines[random].clone();
@@ -127,14 +130,14 @@ impl List {
 
 				let final_display_name = display_name.to_string();
 
-				(first.to_owned(), Some(final_display_name), valid_art_url)
+				Some((first.to_owned(), Some(final_display_name), valid_art_url))
             } else {
 				let final_display_name = display_name.to_string();
 
-				(first.to_owned(), Some(final_display_name), None)
+				Some((first.to_owned(), Some(final_display_name), None))
             }
         } else {
-            (line, None, None)
+            Some((line, None, None))
         }
     }
 
@@ -184,7 +187,7 @@ impl List {
             } else { None }
         };
 
-        let use_cache = cache.is_some();
+        let use_cache = cache.as_ref().map_or(false, |c| !c.items.is_empty());
 
         if use_cache {
             debug_log!("list.rs - expand_bandcamp: using existing cache");
@@ -434,7 +437,11 @@ impl List {
         client: &Client,
         progress: Option<&AtomicF32>,
     ) -> Result<QueuedTrack, tracks::Error> {
-        let (path, custom_name, art_url) = self.random_path();
+        let (path, custom_name, art_url) = self.random_path()
+            .ok_or_else(|| tracks::Error {
+                track: "list".to_string(),
+                kind: tracks::error::Kind::EmptyList,
+            })?;
         let (data, full_path) = self.download(&path, client, progress).await?;
 
         let name = custom_name.map_or_else(

@@ -61,9 +61,6 @@ impl Downloader {
             }
             Err(error) => {
                 debug_log!("downloader.rs - push_buffer: error fetching track err={}", error);
-                if debug {
-                    panic!("{error} - {:?}", error.source())
-                }
 
                 if !error.is_timeout() {
                     sleep(self.player.timeout).await;

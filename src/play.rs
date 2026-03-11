@@ -19,14 +19,13 @@ pub async fn play(args: Args) -> eyre::Result<(), player::Error> {
 
     panic::set_hook(Box::new(move |x| {
         let mut lock = stdout().lock();
-        crossterm::execute!(
+        let _ = crossterm::execute!(
             lock,
             Clear(ClearType::FromCursorDown),
             Show,
             PopKeyboardEnhancementFlags
-        )
-        .unwrap();
-        terminal::disable_raw_mode().unwrap();
+        );
+        let _ = terminal::disable_raw_mode();
 
         eyre_hook(x);
         exit(1)
