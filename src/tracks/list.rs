@@ -23,6 +23,7 @@ use crate::{
     bandcamp::DiscographyParser,
     debug_log,
     data_dir,
+    cache_dir,
     tracks::{self, error::Context, TrackData, SharedAudioBuffer}
 };
 
@@ -177,7 +178,7 @@ impl List {
         let url_hash = utils::hash_string(base_url);
 
         let cache: Option<cache::BandcampCache> = {
-            let data_dir = data_dir()?;
+            let data_dir = cache_dir()?;
             if let Some(path) = cache::find_existing_cache_path(&data_dir, url_hash) {
                 if let Some(gz) = cache::BandcampCache::read_gz_to_string(&path).await {
                     serde_json::from_str(&gz).ok()
@@ -219,7 +220,7 @@ impl List {
             if let Some(ref cached) = cache {
                 if cached.is_expired(172800) {
 
-                    let data_dir = data_dir()?;
+                    let data_dir = cache_dir()?;
 
                     if let Some(path) = cache::find_existing_cache_path(&data_dir, url_hash) {
                         cache::start_cache_update_background(base_url, client, &path);
@@ -286,7 +287,7 @@ impl List {
             if max_albums.is_none() {
             let new_cache = cache::BandcampCache::new(base_url.to_string(), cached_items);
                 let cache_key = format!("bandcamp_cache_{}_{}", url_hash, new_cache.items_hash);
-                let cache_path_gz = data_dir()?.join(format!("{}.cache.gz", cache_key));
+                let cache_path_gz = cache_dir()?.join(format!("{}.cache.gz", cache_key));
                 let cache_json = serde_json::to_string(&new_cache)?;
                 cache::write_cache_with_error_handling(&cache_path_gz, &cache_json).await;
         }

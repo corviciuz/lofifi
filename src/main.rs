@@ -134,6 +134,14 @@ pub fn data_dir() -> eyre::Result<PathBuf, player::Error> {
     Ok(dir)
 }
 
+pub fn cache_dir() -> eyre::Result<PathBuf, player::Error> {
+    let dir = data_dir()?.join("cache");
+    if !dir.exists() {
+        std::fs::create_dir_all(&dir).map_err(|_| player::Error::DataDir)?;
+    }
+    Ok(dir)
+}
+
 #[tokio::main]
 async fn main() -> eyre::Result<()> {
     debug_log!("main.rs - main: starting lowfi application");

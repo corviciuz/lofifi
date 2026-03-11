@@ -7,7 +7,7 @@ use crate::{
     bandcamp::DiscographyParser,
     bandcamp::discography::is_album_excluded,
     debug_log,
-    data_dir,
+    cache_dir,
 };
 use super::utils::{current_timestamp, hash_string, HasId, hash_items_with_ids};
 
@@ -132,9 +132,9 @@ pub async fn create_cache_from_presave(
     let content_hash = crate::tracks::utils::hash_items_with_ids(&presaved_list.items);
     let url_hash = hash_string(base_url);
     let cache_key = format!("bandcamp_cache_{}_{}", url_hash, content_hash);
-    let cache_path_gz = data_dir()?.join(format!("{}.cache.gz", cache_key));
+    let cache_path_gz = cache_dir()?.join(format!("{}.cache.gz", cache_key));
 
-    let data_dir = data_dir()?;
+    let data_dir = cache_dir()?;
     if find_existing_cache_path(&data_dir, url_hash).is_some() {
         debug_log!("cache.rs - create_cache_from_presave: cache already exists for this URL, skipping creation");
         return Ok(false);
@@ -293,8 +293,9 @@ pub async fn update_cache_background(
 
     let url_hash = hash_string(base_url);
     let new_cache_key = format!("bandcamp_cache_{}_{}", url_hash, cache.items_hash);
-    let new_cache_path = cache_path.parent().unwrap().join(format!("{}.cache", new_cache_key));
-    let new_cache_path_gz = cache_path.parent().unwrap().join(format!("{}.cache.gz", new_cache_key));
+    let target_dir = cache_dir()?;
+    let new_cache_path = target_dir.join(format!("{}.cache", new_cache_key));
+    let new_cache_path_gz = target_dir.join(format!("{}.cache.gz", new_cache_key));
 
     BandcampCache::write_gz_string(&new_cache_path_gz, &cache_json).await?;
 

@@ -1,4 +1,4 @@
-use std::{error::Error, sync::Arc};
+use std::sync::Arc;
 
 use tokio::{
     sync::mpsc::{self, Receiver, Sender},
@@ -29,7 +29,7 @@ impl Downloader {
         Self { player, rx, tx }
     }
 
-    pub async fn push_buffer(&self, debug: bool) {
+    pub async fn push_buffer(&self, _debug: bool) {
         debug_log!("downloader.rs - push_buffer: requesting random track");
         let data = self.player.list.random(&self.player.client, None).await;
         match data {

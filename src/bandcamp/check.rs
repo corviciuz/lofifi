@@ -42,8 +42,8 @@ pub async fn run(out: &Path, base_url: &str, _timeout: u64, _debug: bool, fetch_
         base_url.trim_end_matches('/').trim_end_matches("/music")
     };
 
-    let data_dir = crate::data_dir()?;
-    println!("Data dir: {}", data_dir.display());
+    let data_dir = crate::cache_dir()?;
+    println!("Cache dir: {}", data_dir.display());
 
     let url_hash = hash_string(base_url);
     let existing_cache_path = cache::find_existing_cache_path(&data_dir, url_hash);
