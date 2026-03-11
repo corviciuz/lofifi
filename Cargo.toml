@@ -1,0 +1,69 @@
+[package]
+name = "lofifi"
+version = "2.3.14+277353"
+edition = "2024"
+description = "An ultimative version of simple lofi player."
+license = "MIT"
+readme = "README.md"
+categories = [
+    "absolute cinema",
+]
+keywords = ["lofifi", "lofi", "music"]
+documentation = "no"
+homepage = "no"
+repository = "no"
+
+[features]
+default = ["color", "bandcamp"]
+color = ["dep:image", "dep:palette_extract"]
+mpris = ["dep:mpris-server"]
+extra-audio-formats = ["rodio/default"]
+scrape = ["dep:indicatif"]
+bandcamp = []
+presave = []
+
+[dependencies]
+
+clap = { version = "4.5.21", features = ["derive", "cargo"] }
+eyre = "0.6.12"
+fastrand = "2.3.0"
+thiserror = "2.0.12"
+color-eyre = { version = "0.6.5", default-features = false }
+log = "0.4"
+env_logger = { version = "0.11", default-features = false, features = ["auto-color"] }
+
+tokio = { version = "1.48", features = ["macros", "rt-multi-thread", "fs"], default-features = false }
+futures = "0.3.31"
+arc-swap = "1.7.1"
+
+reqwest = { version = "0.13", features = ["stream", "json", "blocking"] }
+bytes = "1.9.0"
+lofty = "0.22.4"
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+
+crossterm = { version = "0.29.0", features = ["event-stream"] }
+rodio = { version = "0.21.1", features = ["symphonia-mp3", "playback"], default-features = false }
+mpris-server = { version = "0.9.0", optional = true }
+dirs = "6.0.0"
+
+convert_case = "0.10"
+lazy_static = "1.5.0"
+url = "2.5.4"
+unicode-segmentation = "1.12.0"
+urlencoding = "2.1.0"
+async-recursion = "1.0.0"
+
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = { version = "1.0.142" }
+scraper = "0.25"
+html-escape = { version = "0.2.13" }
+indicatif = { version = "0.18.0", optional = true }
+regex = "1.12.1"
+atomic_float = "1.1.0"
+flate2 = { version = "1.0", features = ["rust_backend"], default-features = false }
+
+image = { version = "0.25", optional = true }
+palette_extract = { version = "0.1", optional = true }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+libc = "0.2.167"
