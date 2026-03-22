@@ -4,7 +4,7 @@ pub fn silent_get_output_stream() -> eyre::Result<rodio::MixerDeviceSink, crate:
     use rodio::DeviceSinkBuilder;
     use std::ffi::CString;
 
-    extern "C" {
+    unsafe extern "C" {
         static stderr: *mut libc::FILE;
     }
 
