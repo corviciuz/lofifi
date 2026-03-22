@@ -4,7 +4,7 @@ use arc_swap::ArcSwapOption;
 use atomic_float::AtomicF32;
 use downloader::Downloader;
 use reqwest::Client;
-use rodio::{OutputStream, OutputStreamBuilder, Sink};
+use rodio::{MixerDeviceSink, DeviceSinkBuilder, Player as RodioPlayer};
 use tokio::{
     select,
     sync::{
@@ -42,7 +42,7 @@ pub mod mpris;
 
 pub struct Player {
 
-    pub sink: Arc<Sink>,
+    pub sink: Arc<RodioPlayer>,
 
     pub buffer_size: usize,
 
@@ -144,7 +144,7 @@ impl Player {
         crate::bandcamp::discography::DiscographyParser::create_http_client()
     }
 
-    pub async fn new(args: &Args) -> eyre::Result<(Self, OutputStream), player::Error> {
+    pub async fn new(args: &Args) -> eyre::Result<(Self, MixerDeviceSink), player::Error> {
         debug_log!("player.rs - new: initialization start buffer_size={} timeout={} paused={} debug={}", args.buffer_size, args.timeout, args.paused, args.debug);
 
         let bookmarks = Bookmarks::load().await?;
@@ -166,14 +166,14 @@ impl Player {
         let mut stream = if !args.alternate && !args.debug {
             audio::silent_get_output_stream()?
         } else {
-            OutputStreamBuilder::open_default_stream()?
+            DeviceSinkBuilder::open_default_sink()?
         };
 
         #[cfg(not(target_os = "linux"))]
-        let mut stream = OutputStreamBuilder::open_default_stream()?;
+        let mut stream = DeviceSinkBuilder::open_default_sink()?;
 
         stream.log_on_drop(false);
-        let sink = Sink::connect_new(stream.mixer());
+        let sink = RodioPlayer::connect_new(stream.mixer());
 
         if args.paused {
             sink.pause();

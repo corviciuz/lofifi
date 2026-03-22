@@ -21,7 +21,7 @@ pub enum Error {
     TrackListLoad(eyre::Error),
 
     #[error("interfacing with audio failed")]
-    Stream(#[from] rodio::StreamError),
+    Stream(#[from] rodio::DeviceSinkError),
 
     #[error("NUL error, if you see this, something has gone VERY wrong")]
     Nul(#[from] NulError),

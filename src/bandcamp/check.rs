@@ -735,12 +735,10 @@ fn write_tags_only(
         }
 
         if let Some(img) = cover {
-            let picture = Picture::new_unchecked(
-                PictureType::CoverFront,
-                Some(MimeType::Jpeg),
-                None,
-                img.clone().to_vec(),
-            );
+            let picture = Picture::unchecked(img.clone().to_vec())
+                .pic_type(PictureType::CoverFront)
+                .mime_type(MimeType::Jpeg)
+                .build();
             tag.push_picture(picture);
         }
 

@@ -30,7 +30,7 @@ impl Current {
 #[derive(Clone)]
 pub struct State {
 
-    pub sink: Arc<rodio::Sink>,
+    pub sink: Arc<rodio::Player>,
 
     pub current: Current,
 
@@ -41,7 +41,7 @@ pub struct State {
 
 impl State {
 
-    pub fn initial(sink: Arc<rodio::Sink>) -> Self {
+    pub fn initial(sink: Arc<rodio::Player>) -> Self {
         Self {
             sink,
             current: Current::default(),

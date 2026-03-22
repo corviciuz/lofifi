@@ -1,7 +1,7 @@
 #[cfg(target_os = "linux")]
-pub fn silent_get_output_stream() -> eyre::Result<rodio::OutputStream, crate::player::Error> {
+pub fn silent_get_output_stream() -> eyre::Result<rodio::MixerDeviceSink, crate::player::Error> {
     use libc::freopen;
-    use rodio::OutputStreamBuilder;
+    use rodio::DeviceSinkBuilder;
     use std::ffi::CString;
 
     extern "C" {
@@ -16,7 +16,7 @@ pub fn silent_get_output_stream() -> eyre::Result<rodio::OutputStream, crate::pl
         freopen(null.as_ptr(), mode.as_ptr(), stderr);
     }
 
-    let stream = OutputStreamBuilder::open_default_stream()?;
+    let stream = DeviceSinkBuilder::open_default_sink()?;
 
     let tty = CString::new("/dev/tty")?;
 
