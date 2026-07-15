@@ -476,17 +476,32 @@ impl List {
     pub async fn load(tracks: Option<&String>, bandcamp_mode: bool) -> eyre::Result<Self> {
         debug_log!("list.rs - load: loading start tracks_arg_present={} bandcamp_mode={} (true=Bandcamp, false=Archive)", tracks.is_some(), bandcamp_mode);
         let (name, raw_content, path_str) = if let Some(arg) = tracks {
+            let is_bandcamp_url = arg.starts_with("http://")
+                || arg.starts_with("https://")
+                || arg.contains("bandcamp.com")
+                || arg.starts_with("bdcmp:");
 
-            let path = data_dir()?.join(format!("{arg}.txt"));
-            let final_path = if path.exists() { path } else { PathBuf::from(arg) };
+            if is_bandcamp_url {
+                let clean_url = arg.strip_prefix("bdcmp:").unwrap_or(arg);
+                let name = if let Ok(url) = url::Url::parse(clean_url) {
+                    url.host_str().unwrap_or("bandcamp").to_string()
+                } else {
+                    "bandcamp".to_string()
+                };
+                let raw = format!("noheader\nbdcmp:{clean_url}");
+                (name, raw, None)
+            } else {
+                let path = data_dir()?.join(format!("{arg}.txt"));
+                let final_path = if path.exists() { path } else { PathBuf::from(arg) };
 
-            let raw = fs::read_to_string(&final_path).await?;
-            let name = final_path
-                .file_stem()
-                .and_then(|x| x.to_str())
-                .ok_or_eyre("invalid track path")?;
+                let raw = fs::read_to_string(&final_path).await?;
+                let name = final_path
+                    .file_stem()
+                    .and_then(|x| x.to_str())
+                    .ok_or_eyre("invalid track path")?;
 
-            (name.to_owned(), raw, final_path.to_str().map(String::from))
+                (name.to_owned(), raw, final_path.to_str().map(String::from))
+            }
         } else {
             if bandcamp_mode {
 

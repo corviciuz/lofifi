@@ -77,7 +77,7 @@ impl DiscographyParser {
     ) -> Result<Vec<DiscographyItem>> {
         debug_log!("discography.rs - get_discography_with_tracks: processing artist={} include_tracks={} max_albums={:?}", artist_url, include_tracks, max_albums);
 
-        let music_url = if artist_url.contains("/album/") {
+        let music_url = if artist_url.contains("/album/") || artist_url.contains("/track/") {
             artist_url.to_string()
         } else {
             format!(
